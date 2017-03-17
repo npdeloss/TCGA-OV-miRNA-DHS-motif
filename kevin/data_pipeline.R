@@ -76,7 +76,9 @@ os_rfsrc <- rfsrc(Surv(os_time, os_code)~., data = imputed_df, importance = "per
 summary(survfit(Surv(trunk_df$os_time, trunk_df$os_code)~1), times = 60 * 30.5)
 survfit(Surv(trunk_df$os_time, trunk_df$os_code)~1)
 
-write.csv(os_rfsrc$importance[os_rfsrc$importance > abs(min(min(os_rfsrc$importance), 0))], "out/os_gene_importance.csv")
+write.csv(os_rfsrc$importance, "out/os_gene_importance.csv")
+write.csv(os_rfsrc$importance[os_rfsrc$importance > abs(min(min(os_rfsrc$importance), 0))], "out/os_gene_importance_sig.csv")
+sig_os <- os_rfsrc$importance[os_rfsrc$importance > abs(min(min(os_rfsrc$importance), 0))]
 
 # impute and regress PFS ####
 trunk_df <- mrg_df[c(miRs, "PFS_days", "PFS_recurr")]
@@ -86,8 +88,9 @@ pfs_rfsrc <- rfsrc(Surv(PFS_days, PFS_recurr)~., data = imputed_df, importance =
 summary(survfit(Surv(trunk_df$PFS_days, trunk_df$PFS_recurr)~1), times = 6 * 30.5)
 survfit(Surv(trunk_df$PFS_days, trunk_df$PFS_recurr)~1)
 
-write.csv(pfs_rfsrc$importance[pfs_rfsrc$importance > abs(min(min(pfs_rfsrc$importance), 0))], "out/pfs_gene_importance.csv")
-
+write.csv(pfs_rfsrc$importance, "out/pfs_gene_importance.csv")
+write.csv(pfs_rfsrc$importance[pfs_rfsrc$importance > abs(min(min(pfs_rfsrc$importance), 0))], "out/pfs_gene_importance_sig.csv")
+sig_pfs <- pfs_rfsrc$importance[pfs_rfsrc$importance > abs(min(min(pfs_rfsrc$importance), 0))]
 
 # impute and classify stage of presentation ####
 trunk_df <- mrg_df[c(miRs, "stage_recode2")]
@@ -96,6 +99,15 @@ stage_rfsrc <- rfsrc(stage_recode2~., data = imputed_df, importance = "permute",
 
 prop.table(table(trunk_df$stage_recode2))
 
-write.csv(stage_rfsrc$importance[stage_rfsrc$importance > abs(min(min(stage_rfsrc$importance), 0))], "out/stage_gene_importance.csv")
+write.csv(stage_rfsrc$importance[,1], "out/stage_gene_importance.csv")
+write.csv(stage_rfsrc$importance[,1][stage_rfsrc$importance[,1] > abs(min(min(stage_rfsrc$importance[,1]), 0))], "out/stage_gene_importance_sig.csv")
+sig_stage <-stage_rfsrc$importance[,1][stage_rfsrc$importance[,1] > abs(min(min(stage_rfsrc$importance[,1]), 0))] 
+
+# merge mirs
+merge(
+  data.frame(os = sig_os, mirs = names(sig_os)),
+  data.frame(pfs = sig_pfs, mirs = names(sig_pfs)),
+  all = TRUE
+)
 
 save.image("miR OvCa.RData")
