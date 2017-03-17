@@ -104,10 +104,13 @@ write.csv(stage_rfsrc$importance[,1][stage_rfsrc$importance[,1] > abs(min(min(st
 sig_stage <-stage_rfsrc$importance[,1][stage_rfsrc$importance[,1] > abs(min(min(stage_rfsrc$importance[,1]), 0))] 
 
 # merge mirs
-merge(
+rslt1 <- merge(
   data.frame(os = sig_os, mirs = names(sig_os)),
   data.frame(pfs = sig_pfs, mirs = names(sig_pfs)),
   all = TRUE
 )
+
+rslt2 <- merge(data.frame(stage = sig_stage, mirs = names(sig_stage)), rslt1, all=TRUE)
+write.csv(rslt2, "out/merged_sigs.csv")
 
 save.image("miR OvCa.RData")
