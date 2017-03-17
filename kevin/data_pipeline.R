@@ -72,23 +72,30 @@ summary(mrg_df$days_to_last_followup)
 trunk_df <- mrg_df[c(miRs, "os_time", "os_code")]
 imputed_df <- impute.rfsrc(Surv(os_time, os_code)~., data = trunk_df)
 os_rfsrc <- rfsrc(Surv(os_time, os_code)~., data = imputed_df, importance = "permute", seed = 1223)
-write.csv(as.data.frame(-sort(os_rfsrc$importance)), "out/os_gene_importance.csv")
-summary(survfit(Surv(trunk_df$os_time, trunk_df$os_code)~1), times = 60)
+
+summary(survfit(Surv(trunk_df$os_time, trunk_df$os_code)~1), times = 60 * 30.5)
 survfit(Surv(trunk_df$os_time, trunk_df$os_code)~1)
+
+write.csv(os_rfsrc$importance[os_rfsrc$importance > abs(min(min(os_rfsrc$importance), 0))], "out/os_gene_importance.csv")
 
 # impute and regress PFS ####
 trunk_df <- mrg_df[c(miRs, "PFS_days", "PFS_recurr")]
 imputed_df <- impute.rfsrc(Surv(PFS_days, PFS_recurr)~., data = trunk_df)
 pfs_rfsrc <- rfsrc(Surv(PFS_days, PFS_recurr)~., data = imputed_df, importance = "permute", seed = 1223)
-write.csv(as.data.frame(-sort(pfs_rfsrc$importance)), "out/pfs_gene_importance.csv")
-summary(survfit(Surv(trunk_df$PFS_days, trunk_df$PFS_recurr)~1), times = 60)
+
+summary(survfit(Surv(trunk_df$PFS_days, trunk_df$PFS_recurr)~1), times = 6 * 30.5)
 survfit(Surv(trunk_df$PFS_days, trunk_df$PFS_recurr)~1)
+
+write.csv(pfs_rfsrc$importance[pfs_rfsrc$importance > abs(min(min(pfs_rfsrc$importance), 0))], "out/pfs_gene_importance.csv")
+
 
 # impute and classify stage of presentation ####
 trunk_df <- mrg_df[c(miRs, "stage_recode2")]
 imputed_df <- impute.rfsrc(stage_recode2~., data = trunk_df)
 stage_rfsrc <- rfsrc(stage_recode2~., data = imputed_df, importance = "permute", seed = 1223)
-write.csv(as.data.frame(-sort(stage_rfsrc$importance)), "out/stage_gene_importance.csv")
-prop.table(trunk_df$stage_recode2)
+
+prop.table(table(trunk_df$stage_recode2))
+
+write.csv(stage_rfsrc$importance[stage_rfsrc$importance > abs(min(min(stage_rfsrc$importance), 0))], "out/stage_gene_importance.csv")
 
 save.image("miR OvCa.RData")

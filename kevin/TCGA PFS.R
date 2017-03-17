@@ -17,14 +17,23 @@ TCGA_PFS <- function(drug_df, clinical_df) {
     group_by(bcr_patient_barcode) %>%
     filter(regimen_indication == "ADJUVANT") %>%
     filter(days_to_drug_therapy_start == max(days_to_drug_therapy_start)) %>%
-    select(bcr_patient_barcode, mx_therapy_time = days_to_drug_therapy_start)
+    distinct(bcr_patient_barcode, days_to_drug_therapy_start)
+  
+  # hack
+  initial <- initial[c(1,2)] %>%
+    select(bcr_patient_barcode, mx_therapy_time = days_to_drug_therapy_start) 
+  
   
   # find start date for either progression or recurrence therapy for min_recurr_time
   recurr <- drug_df %>%
     group_by(bcr_patient_barcode) %>%
     filter(regimen_indication == "PROGRESSION" | regimen_indication == "RECURRENCE") %>%
     filter(days_to_drug_therapy_end == min(days_to_drug_therapy_end)) %>%
-    select(bcr_patient_barcode, min_recurr_time = days_to_drug_therapy_end)
+    distinct(bcr_patient_barcode, days_to_drug_therapy_end)
+  
+  # hack
+  recurr <- recurr[c(1,2)] %>%
+    select(bcr_patient_barcode, min_recurr_time = days_to_drug_therapy_end) 
   
   # merge dfs
   mrg_df1 <- merge(initial, recurr, all.x=TRUE, all.y=FALSE)
