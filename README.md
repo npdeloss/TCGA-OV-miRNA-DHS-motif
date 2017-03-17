@@ -14,5 +14,5 @@ These scripts are dependent on the following installations:
   'randomForestSRC'  
   'TCGAbiolinks'
   
-  MEME Suite (4.11.2)
-  HOMER (v4.9) with hg19 dataset
+  MEME Suite (4.11.2)  
+  HOMER (v4.9) with hg19 dataset  
